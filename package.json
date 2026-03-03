@@ -1,21 +1,36 @@
 {
   "name": "rollbar-cli",
   "version": "1.0.0",
-  "description": "CLI tool wrapping the full Rollbar API v1",
+  "description": "CLI tool wrapping the full Rollbar API v1 (93 endpoints). Tokens stored in OS keychain.",
   "module": "src/index.ts",
   "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/delexw/rollbar-cli.git"
+  },
+  "keywords": [
+    "rollbar",
+    "cli",
+    "error-tracking",
+    "api",
+    "devtools"
+  ],
   "bin": {
     "rollbar": "./dist/rollbar.js"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "bun run src/index.ts",
-    "build": "bun build src/index.ts --outfile dist/rollbar.js --target node",
+    "build": "bun build src/index.ts --outfile dist/rollbar.js --target node --external @napi-rs/keyring",
     "lint": "bunx oxlint",
     "format": "bunx oxfmt --write src/",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepublishOnly": "bun run lint && bun run test && bun run build"
   },
-  "private": true,
   "devDependencies": {
     "@types/bun": "latest",
     "oxfmt": "^0.36.0",
