@@ -11,7 +11,7 @@ export function registerTeamProjectsCommand(program: Command): void {
     .description('List projects in a team (GET /api/1/team/:id/projects)')
     .argument('<team-id>', 'Team ID')
     .action(async (teamId: string) => {
-      const token = program.opts().accountToken ?? getAccountToken(program.opts().project);
+      const token = program.opts().accountToken ?? getAccountToken();
       const format = program.opts().format as OutputFormat;
       const result = await get(token, `/api/1/team/${teamId}/projects`);
       printOutput(result, format);
@@ -21,7 +21,7 @@ export function registerTeamProjectsCommand(program: Command): void {
     .description('List teams for a project (GET /api/1/project/:id/teams)')
     .argument('<project-id>', 'Project ID')
     .action(async (projectId: string) => {
-      const token = program.opts().accountToken ?? getAccountToken(program.opts().project);
+      const token = program.opts().accountToken ?? getAccountToken();
       const format = program.opts().format as OutputFormat;
       const result = await get(token, `/api/1/project/${projectId}/teams`);
       printOutput(result, format);
@@ -32,7 +32,7 @@ export function registerTeamProjectsCommand(program: Command): void {
     .argument('<team-id>', 'Team ID')
     .argument('<project-id>', 'Project ID')
     .action(async (teamId: string, projectId: string) => {
-      const token = program.opts().accountToken ?? getAccountToken(program.opts().project);
+      const token = program.opts().accountToken ?? getAccountToken();
       const format = program.opts().format as OutputFormat;
       const result = await get(token, `/api/1/team/${teamId}/project/${projectId}`);
       printOutput(result, format);
@@ -43,7 +43,7 @@ export function registerTeamProjectsCommand(program: Command): void {
     .argument('<team-id>', 'Team ID')
     .argument('<project-id>', 'Project ID')
     .action(async (teamId: string, projectId: string) => {
-      const token = program.opts().accountToken ?? getAccountToken(program.opts().project);
+      const token = program.opts().accountToken ?? getAccountToken();
       const format = program.opts().format as OutputFormat;
       const result = await put(token, `/api/1/team/${teamId}/project/${projectId}`);
       printOutput(result, format);
@@ -54,7 +54,7 @@ export function registerTeamProjectsCommand(program: Command): void {
     .argument('<team-id>', 'Team ID')
     .argument('<project-id>', 'Project ID')
     .action(async (teamId: string, projectId: string) => {
-      const token = program.opts().accountToken ?? getAccountToken(program.opts().project);
+      const token = program.opts().accountToken ?? getAccountToken();
       const format = program.opts().format as OutputFormat;
       const result = await del(token, `/api/1/team/${teamId}/project/${projectId}`);
       printOutput(result, format);

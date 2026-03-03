@@ -11,7 +11,7 @@ export function registerUserProjectsCommand(program: Command): void {
     .description("List a user's projects (GET /api/1/user/:id/projects)")
     .argument('<user-id>', 'User ID')
     .action(async (userId: string) => {
-      const token = program.opts().accountToken ?? getAccountToken(program.opts().project);
+      const token = program.opts().accountToken ?? getAccountToken();
       const format = program.opts().format as OutputFormat;
       const result = await get(token, `/api/1/user/${userId}/projects`);
       printOutput(result, format);

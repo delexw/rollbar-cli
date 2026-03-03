@@ -3,8 +3,6 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// We need to mock the config module's internal paths, so we'll test the logic
-// by importing and mocking the fs calls
 vi.mock('os', async (importOriginal) => {
   const original = await importOriginal<typeof import('os')>();
   return {
@@ -13,8 +11,44 @@ vi.mock('os', async (importOriginal) => {
   };
 });
 
+// Mock the keyring so tests don't interact with real OS keychain
+const mockPasswords = new Map<string, string>();
+vi.mock('@napi-rs/keyring', () => ({
+  Entry: class MockEntry {
+    service: string;
+    key: string;
+    constructor(service: string, key: string) {
+      this.service = service;
+      this.key = key;
+    }
+    setPassword(password: string) {
+      mockPasswords.set(`${this.service}:${this.key}`, password);
+    }
+    getPassword(): string | null {
+      return mockPasswords.get(`${this.service}:${this.key}`) ?? null;
+    }
+    deletePassword() {
+      if (!mockPasswords.has(`${this.service}:${this.key}`)) {
+        throw new Error('not found');
+      }
+      mockPasswords.delete(`${this.service}:${this.key}`);
+    }
+  },
+}));
+
 import { homedir } from 'os';
-import { getAccountToken, getProjectToken, loadConfig, saveConfig } from '../src/config.ts';
+import {
+  getAccountToken,
+  getProjectToken,
+  hasAccessToken,
+  hasAccountToken,
+  loadConfig,
+  removeAccountToken,
+  removeProject,
+  saveConfig,
+  setAccountToken,
+  setToken,
+} from '../src/config.ts';
 import type { Config } from '../src/config.ts';
 
 describe('config', () => {
@@ -27,6 +61,7 @@ describe('config', () => {
     );
     mkdirSync(testDir, { recursive: true });
     vi.mocked(homedir).mockReturnValue(testDir);
+    mockPasswords.clear();
   });
 
   afterEach(() => {
@@ -37,7 +72,7 @@ describe('config', () => {
   describe('loadConfig', () => {
     it('returns empty config when no config file exists', () => {
       const config = loadConfig();
-      expect(config).toEqual({ projects: {} });
+      expect(config).toEqual({ projects: [] });
     });
 
     it('loads existing config from file', () => {
@@ -45,13 +80,13 @@ describe('config', () => {
       mkdirSync(configDir, { recursive: true });
       const data: Config = {
         defaultProject: 'my-app',
-        projects: { 'my-app': { accessToken: 'tok_123' } },
+        projects: ['my-app'],
       };
       writeFileSync(join(configDir, 'config.json'), JSON.stringify(data));
 
       const config = loadConfig();
       expect(config.defaultProject).toBe('my-app');
-      expect(config.projects['my-app']?.accessToken).toBe('tok_123');
+      expect(config.projects).toEqual(['my-app']);
     });
   });
 
@@ -59,7 +94,7 @@ describe('config', () => {
     it('creates config directory and file', () => {
       const config: Config = {
         defaultProject: 'test',
-        projects: { test: { accessToken: 'abc' } },
+        projects: ['test'],
       };
       saveConfig(config);
 
@@ -68,89 +103,136 @@ describe('config', () => {
 
       const saved = JSON.parse(readFileSync(configPath, 'utf-8'));
       expect(saved.defaultProject).toBe('test');
-      expect(saved.projects.test.accessToken).toBe('abc');
+      expect(saved.projects).toEqual(['test']);
+    });
+  });
+
+  describe('setToken', () => {
+    it('stores project access token in keychain and adds project to config', () => {
+      setToken('my-app', 'tok_abc');
+
+      const config = loadConfig();
+      expect(config.projects).toContain('my-app');
+      expect(hasAccessToken('my-app')).toBe(true);
     });
 
-    it('overwrites existing config', () => {
-      const config1: Config = { projects: { a: { accessToken: '1' } } };
-      saveConfig(config1);
+    it('does not duplicate project name on repeated set', () => {
+      setToken('my-app', 'tok_1');
+      setToken('my-app', 'tok_2');
 
-      const config2: Config = { projects: { b: { accessToken: '2' } } };
-      saveConfig(config2);
+      const config = loadConfig();
+      expect(config.projects.filter((p) => p === 'my-app').length).toBe(1);
+    });
+  });
 
-      const configPath = join(testDir, '.rollbar-cli', 'config.json');
-      const saved = JSON.parse(readFileSync(configPath, 'utf-8'));
-      expect(saved.projects.b.accessToken).toBe('2');
-      expect(saved.projects.a).toBeUndefined();
+  describe('setAccountToken / getAccountToken', () => {
+    it('stores and retrieves a global account token', () => {
+      setAccountToken('acct_xyz');
+      expect(getAccountToken()).toBe('acct_xyz');
+    });
+
+    it('throws when no account token is set', () => {
+      expect(() => getAccountToken()).toThrow('No account token configured');
+    });
+
+    it('account token is independent of projects', () => {
+      setAccountToken('acct_global');
+      setToken('app-a', 'tok_a');
+      setToken('app-b', 'tok_b');
+
+      // Same account token regardless of project context
+      expect(getAccountToken()).toBe('acct_global');
+    });
+  });
+
+  describe('removeAccountToken', () => {
+    it('removes the global account token', () => {
+      setAccountToken('acct_xyz');
+      expect(hasAccountToken()).toBe(true);
+
+      removeAccountToken();
+      expect(hasAccountToken()).toBe(false);
+    });
+
+    it('does not throw when no account token exists', () => {
+      expect(() => removeAccountToken()).not.toThrow();
     });
   });
 
   describe('getProjectToken', () => {
-    it('returns token for named project', () => {
-      const configDir = join(testDir, '.rollbar-cli');
-      mkdirSync(configDir, { recursive: true });
-      writeFileSync(
-        join(configDir, 'config.json'),
-        JSON.stringify({ projects: { app: { accessToken: 'tok_abc' } } }),
-      );
-
+    it('returns token for named project from keychain', () => {
+      setToken('app', 'tok_abc');
       expect(getProjectToken('app')).toBe('tok_abc');
     });
 
     it('returns token for default project when no name given', () => {
-      const configDir = join(testDir, '.rollbar-cli');
-      mkdirSync(configDir, { recursive: true });
-      writeFileSync(
-        join(configDir, 'config.json'),
-        JSON.stringify({
-          defaultProject: 'app',
-          projects: { app: { accessToken: 'tok_def' } },
-        }),
-      );
+      setToken('app', 'tok_def');
+      const config = loadConfig();
+      config.defaultProject = 'app';
+      saveConfig(config);
 
       expect(getProjectToken()).toBe('tok_def');
     });
 
     it('throws when no project specified and no default', () => {
-      const configDir = join(testDir, '.rollbar-cli');
-      mkdirSync(configDir, { recursive: true });
-      writeFileSync(join(configDir, 'config.json'), JSON.stringify({ projects: {} }));
-
       expect(() => getProjectToken()).toThrow('No project specified');
     });
 
-    it('throws when project not found', () => {
-      const configDir = join(testDir, '.rollbar-cli');
-      mkdirSync(configDir, { recursive: true });
-      writeFileSync(join(configDir, 'config.json'), JSON.stringify({ projects: {} }));
-
+    it('throws when project not found in config', () => {
       expect(() => getProjectToken('nonexistent')).toThrow('not found');
+    });
+
+    it('throws when token not in keychain', () => {
+      const config = loadConfig();
+      config.projects.push('orphan');
+      saveConfig(config);
+
+      expect(() => getProjectToken('orphan')).toThrow('No access token stored');
     });
   });
 
-  describe('getAccountToken', () => {
-    it('returns account token for named project', () => {
-      const configDir = join(testDir, '.rollbar-cli');
-      mkdirSync(configDir, { recursive: true });
-      writeFileSync(
-        join(configDir, 'config.json'),
-        JSON.stringify({
-          projects: { app: { accessToken: 'tok', accountToken: 'acct_tok' } },
-        }),
-      );
+  describe('removeProject', () => {
+    it('removes project token from keychain and project from config', () => {
+      setToken('app', 'tok');
+      removeProject('app');
 
-      expect(getAccountToken('app')).toBe('acct_tok');
+      const config = loadConfig();
+      expect(config.projects).not.toContain('app');
+      expect(hasAccessToken('app')).toBe(false);
     });
 
-    it('throws when no account token set', () => {
-      const configDir = join(testDir, '.rollbar-cli');
-      mkdirSync(configDir, { recursive: true });
-      writeFileSync(
-        join(configDir, 'config.json'),
-        JSON.stringify({ projects: { app: { accessToken: 'tok' } } }),
-      );
+    it('does not affect the global account token', () => {
+      setToken('app', 'tok');
+      setAccountToken('acct_global');
 
-      expect(() => getAccountToken('app')).toThrow('No account token');
+      removeProject('app');
+
+      expect(hasAccountToken()).toBe(true);
+      expect(getAccountToken()).toBe('acct_global');
+    });
+
+    it('clears default if removed project was default', () => {
+      setToken('app', 'tok');
+      const config = loadConfig();
+      config.defaultProject = 'app';
+      saveConfig(config);
+
+      removeProject('app');
+      expect(loadConfig().defaultProject).toBeUndefined();
+    });
+  });
+
+  describe('hasAccessToken / hasAccountToken', () => {
+    it('returns false when no token stored', () => {
+      expect(hasAccessToken('nope')).toBe(false);
+      expect(hasAccountToken()).toBe(false);
+    });
+
+    it('returns true when tokens are stored', () => {
+      setToken('app', 'tok');
+      setAccountToken('acct');
+      expect(hasAccessToken('app')).toBe(true);
+      expect(hasAccountToken()).toBe(true);
     });
   });
 });

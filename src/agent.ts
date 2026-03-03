@@ -12,8 +12,8 @@ Before using API commands, configure authentication:
 # Set a project access token (for most endpoints)
 rollbar config set-token <project-name> <access-token>
 
-# Set an account-level token (for teams, users, projects management)
-rollbar config set-account-token <project-name> <account-token>
+# Set a global account-level token (for teams, users, projects management)
+rollbar config set-account-token <account-token>
 
 # Set the default project
 rollbar config set-default <project-name>
@@ -33,7 +33,8 @@ You can also pass tokens inline: \`rollbar --token <token> items list\`
 ### Configuration
 \`\`\`
 rollbar config set-token <project> <token>        # Set project token
-rollbar config set-account-token <project> <token> # Set account token
+rollbar config set-account-token <token>            # Set global account token
+rollbar config remove-account-token                # Remove account token
 rollbar config set-default <project>               # Set default project
 rollbar config list                                # List configured projects
 rollbar config remove <project>                    # Remove project config
@@ -236,7 +237,7 @@ rollbar reports occurrence-counts --hours 24
 - Most list commands support \`--page\` for pagination
 - Output is JSON by default (best for programmatic use)
 - Project-level commands use the project access token
-- Account-level commands (teams, users, projects) require an account token
+- Account-level commands (teams, users, projects) require a global account token set via \`rollbar config set-account-token\`
 `;
 
 const COMPACT_PROMPT = `# Rollbar CLI Reference (Compact)

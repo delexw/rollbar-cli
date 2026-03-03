@@ -27,11 +27,11 @@ Configure a project access token before using API commands:
 rollbar config set-token <project-name> <access-token>
 rollbar config set-default <project-name>
 
-# For account-level commands (teams, users, projects)
-rollbar config set-account-token <project-name> <account-token>
+# For account-level commands (teams, users, projects) — one global token
+rollbar config set-account-token <account-token>
 ```
 
-Tokens are stored in `~/.rollbar-cli/config.json`.
+Tokens are stored securely in your OS keychain via [`@napi-rs/keyring`](https://www.npmjs.com/package/@napi-rs/keyring) (macOS Keychain, Windows Credential Manager, Linux Secret Service). Only project names and the default project setting are stored in `~/.rollbar-cli/config.json` — no tokens are written to disk.
 
 You can also pass tokens inline:
 
@@ -128,7 +128,7 @@ bun run format           # Format with oxfmt
 src/
   index.ts           Entry point, CLI setup
   client.ts          HTTP client (fetch-based, auth handling)
-  config.ts          Config management (~/.rollbar-cli/config.json)
+  config.ts          Config management (OS keychain + ~/.rollbar-cli/config.json)
   output.ts          Output formatting (JSON, table, plain)
   agent.ts           AI agent prompt generator
   commands/          One file per API category (20 files)

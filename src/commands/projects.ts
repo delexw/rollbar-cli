@@ -12,7 +12,7 @@ export function registerProjectsCommand(program: Command): void {
     .description('Create a project (POST /api/1/projects)')
     .requiredOption('--name <name>', 'Project name')
     .action(async (opts: { name: string }) => {
-      const token = program.opts().accountToken ?? getAccountToken(program.opts().project);
+      const token = program.opts().accountToken ?? getAccountToken();
       const format = program.opts().format as OutputFormat;
       const result = await post(token, '/api/1/projects', { name: opts.name });
       printOutput(result, format);
@@ -22,7 +22,7 @@ export function registerProjectsCommand(program: Command): void {
     .command('list')
     .description('List all projects (GET /api/1/projects)')
     .action(async () => {
-      const token = program.opts().accountToken ?? getAccountToken(program.opts().project);
+      const token = program.opts().accountToken ?? getAccountToken();
       const format = program.opts().format as OutputFormat;
       const result = await get(token, '/api/1/projects');
       printOutput(result, format);

@@ -13,7 +13,7 @@ export function registerTeamsCommand(program: Command): void {
     .requiredOption('--name <name>', 'Team name')
     .requiredOption('--access-level <level>', 'Access level (standard, light, view)')
     .action(async (opts: { name: string; accessLevel: string }) => {
-      const token = program.opts().accountToken ?? getAccountToken(program.opts().project);
+      const token = program.opts().accountToken ?? getAccountToken();
       const format = program.opts().format as OutputFormat;
       const result = await post(token, '/api/1/teams', {
         name: opts.name,
@@ -26,7 +26,7 @@ export function registerTeamsCommand(program: Command): void {
     .command('list')
     .description('List all teams (GET /api/1/teams)')
     .action(async () => {
-      const token = program.opts().accountToken ?? getAccountToken(program.opts().project);
+      const token = program.opts().accountToken ?? getAccountToken();
       const format = program.opts().format as OutputFormat;
       const result = await get(token, '/api/1/teams');
       printOutput(result, format);
@@ -37,7 +37,7 @@ export function registerTeamsCommand(program: Command): void {
     .description('Get a team (GET /api/1/team/:id)')
     .argument('<team-id>', 'Team ID')
     .action(async (teamId: string) => {
-      const token = program.opts().accountToken ?? getAccountToken(program.opts().project);
+      const token = program.opts().accountToken ?? getAccountToken();
       const format = program.opts().format as OutputFormat;
       const result = await get(token, `/api/1/team/${teamId}`);
       printOutput(result, format);
@@ -48,7 +48,7 @@ export function registerTeamsCommand(program: Command): void {
     .description('Delete a team (DELETE /api/1/team/:id)')
     .argument('<team-id>', 'Team ID')
     .action(async (teamId: string) => {
-      const token = program.opts().accountToken ?? getAccountToken(program.opts().project);
+      const token = program.opts().accountToken ?? getAccountToken();
       const format = program.opts().format as OutputFormat;
       const result = await del(token, `/api/1/team/${teamId}`);
       printOutput(result, format);

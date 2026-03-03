@@ -1,5 +1,14 @@
 import { Command } from 'commander';
-import { loadConfig, saveConfig } from '../config.ts';
+import {
+  hasAccessToken,
+  hasAccountToken,
+  loadConfig,
+  removeAccountToken,
+  removeProject,
+  saveConfig,
+  setAccountToken,
+  setToken,
+} from '../config.ts';
 import type { OutputFormat } from '../output.ts';
 import { printOutput } from '../output.ts';
 
@@ -8,32 +17,35 @@ export function registerConfigCommand(program: Command): void {
 
   config
     .command('set-token')
-    .description('Set project access token')
+    .description('Set project access token (stored in OS keychain)')
     .argument('<project-name>', 'Project name')
     .argument('<access-token>', 'Rollbar project access token')
     .action((projectName: string, accessToken: string) => {
-      const cfg = loadConfig();
-      cfg.projects[projectName] = { ...cfg.projects[projectName], accessToken };
-      saveConfig(cfg);
+      setToken(projectName, accessToken);
       const format = program.opts().format as OutputFormat;
-      printOutput({ message: `Token set for project "${projectName}"` }, format);
+      printOutput(
+        { message: `Token set for project "${projectName}" (stored in OS keychain)` },
+        format,
+      );
     });
 
   config
     .command('set-account-token')
-    .description('Set account-level token for a project')
-    .argument('<project-name>', 'Project name')
+    .description('Set global account-level token (stored in OS keychain)')
     .argument('<token>', 'Rollbar account access token')
-    .action((projectName: string, token: string) => {
-      const cfg = loadConfig();
-      if (!cfg.projects[projectName]) {
-        cfg.projects[projectName] = { accessToken: '', accountToken: token };
-      } else {
-        cfg.projects[projectName]!.accountToken = token;
-      }
-      saveConfig(cfg);
+    .action((token: string) => {
+      setAccountToken(token);
       const format = program.opts().format as OutputFormat;
-      printOutput({ message: `Account token set for project "${projectName}"` }, format);
+      printOutput({ message: 'Account token set (stored in OS keychain)' }, format);
+    });
+
+  config
+    .command('remove-account-token')
+    .description('Remove the global account-level token from OS keychain')
+    .action(() => {
+      removeAccountToken();
+      const format = program.opts().format as OutputFormat;
+      printOutput({ message: 'Account token removed from keychain' }, format);
     });
 
   config
@@ -42,7 +54,7 @@ export function registerConfigCommand(program: Command): void {
     .argument('<project-name>', 'Project name')
     .action((projectName: string) => {
       const cfg = loadConfig();
-      if (!cfg.projects[projectName]) {
+      if (!cfg.projects.includes(projectName)) {
         console.error(`Warning: project "${projectName}" has no token configured yet.`);
       }
       cfg.defaultProject = projectName;
@@ -57,10 +69,9 @@ export function registerConfigCommand(program: Command): void {
     .action(() => {
       const cfg = loadConfig();
       const format = program.opts().format as OutputFormat;
-      const projects = Object.entries(cfg.projects).map(([name, p]) => ({
+      const projects = cfg.projects.map((name) => ({
         name,
-        hasAccessToken: !!p.accessToken,
-        hasAccountToken: !!p.accountToken,
+        hasAccessToken: hasAccessToken(name),
         isDefault: cfg.defaultProject === name,
       }));
       printOutput(projects, format);
@@ -68,17 +79,15 @@ export function registerConfigCommand(program: Command): void {
 
   config
     .command('remove')
-    .description('Remove a project configuration')
+    .description('Remove a project configuration and its token from OS keychain')
     .argument('<project-name>', 'Project name')
     .action((projectName: string) => {
-      const cfg = loadConfig();
-      delete cfg.projects[projectName];
-      if (cfg.defaultProject === projectName) {
-        cfg.defaultProject = undefined;
-      }
-      saveConfig(cfg);
+      removeProject(projectName);
       const format = program.opts().format as OutputFormat;
-      printOutput({ message: `Project "${projectName}" removed` }, format);
+      printOutput(
+        { message: `Project "${projectName}" removed (token deleted from keychain)` },
+        format,
+      );
     });
 
   config
@@ -89,12 +98,12 @@ export function registerConfigCommand(program: Command): void {
       const format = program.opts().format as OutputFormat;
       const display = {
         defaultProject: cfg.defaultProject ?? '(none)',
+        accountToken: hasAccountToken() ? '(stored in keychain)' : '(not set)',
         projects: Object.fromEntries(
-          Object.entries(cfg.projects).map(([name, p]) => [
+          cfg.projects.map((name) => [
             name,
             {
-              accessToken: p.accessToken ? `${p.accessToken.slice(0, 8)}...` : '(not set)',
-              accountToken: p.accountToken ? `${p.accountToken.slice(0, 8)}...` : '(not set)',
+              accessToken: hasAccessToken(name) ? '(stored in keychain)' : '(not set)',
             },
           ]),
         ),
