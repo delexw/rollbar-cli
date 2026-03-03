@@ -1,0 +1,31 @@
+{
+  "name": "rollbar-cli",
+  "version": "1.0.0",
+  "description": "CLI tool wrapping the full Rollbar API v1",
+  "module": "src/index.ts",
+  "type": "module",
+  "bin": {
+    "rollbar": "./dist/rollbar.js"
+  },
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "build": "bun build src/index.ts --outfile dist/rollbar.js --target node",
+    "lint": "bunx oxlint",
+    "format": "bunx oxfmt --write src/",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "oxfmt": "^0.36.0",
+    "oxlint": "^1.51.0",
+    "vitest": "^4.0.18"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "commander": "^14.0.3"
+  }
+}
