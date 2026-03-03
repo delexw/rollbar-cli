@@ -9,6 +9,12 @@ A TypeScript CLI tool wrapping the full Rollbar API v1 (93 endpoints across 24 c
 ## Installation
 
 ```bash
+npm install -g @delexw/rollbar-cli
+```
+
+### From source
+
+```bash
 bun install
 bun run build
 ```
