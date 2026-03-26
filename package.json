@@ -1,6 +1,6 @@
 {
   "name": "@delexw/rollbar-cli",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "CLI tool wrapping the full Rollbar API v1 (93 endpoints). Tokens stored in OS keychain.",
   "module": "src/index.ts",
   "type": "module",

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
+import { version } from '../package.json' with { type: 'json' };
 import { registerAgentCommand } from './agent.ts';
 import { registerConfigCommand } from './commands/config.ts';
 import { registerDeploysCommand } from './commands/deploys.ts';
@@ -28,7 +29,7 @@ const program = new Command();
 program
   .name('rollbar')
   .description('CLI tool wrapping the full Rollbar API v1')
-  .version('1.0.0')
+  .version(version)
   .option('--project <name>', 'Use a specific project configuration')
   .option('--token <token>', 'Override with an explicit access token')
   .option('--account-token <token>', 'Override with an explicit account-level token')
