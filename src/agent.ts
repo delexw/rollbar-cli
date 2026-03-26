@@ -47,14 +47,14 @@ rollbar items create --data <json>                 # Create item
 rollbar items get --id <id>                        # Get by ID
 rollbar items get --uuid <uuid>                    # Get by UUID
 rollbar items get --counter <counter>              # Get by project counter
-rollbar items list [--status <s>] [--level <l>] [--page <n>]  # List items
+rollbar items list [--status <s>] [--level <l>] [--environment <e>] [--page <n>]  # List items
 rollbar items update <id> --data <json>            # Update item
 \`\`\`
 
 ### Occurrences (Individual Events)
 \`\`\`
-rollbar occurrences list [--page <n>]              # List all occurrences
-rollbar occurrences list-by-item <item-id> [--page <n>]  # List for item
+rollbar occurrences list [--page <n>] [--last-id <id>] [--limit <n>]  # List all occurrences
+rollbar occurrences list-by-item <item-id> [--page <n>]               # List for item
 rollbar occurrences get <id>                       # Get occurrence
 rollbar occurrences delete <id>                    # Delete occurrence
 \`\`\`

@@ -10,11 +10,13 @@ export function registerOccurrencesCommand(program: Command): void {
   occ
     .command('list')
     .description('List all occurrences (GET /api/1/instances)')
-    .option('--page <page>', 'Page number')
-    .action(async (opts: { page?: string }) => {
+    .option('--page <page>', 'Page number (default 1)')
+    .option('--last-id <lastId>', 'Return next 20 instances after this occurrence ID (overrides --page)')
+    .option('--limit <limit>', 'Number of results per page (default 20, max 5000)')
+    .action(async (opts: { page?: string; lastId?: string; limit?: string }) => {
       const token = program.opts().token ?? getProjectToken(program.opts().project);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, '/api/1/instances', { page: opts.page });
+      const result = await get(token, '/api/1/instances', { page: opts.page, lastId: opts.lastId, limit: opts.limit });
       printOutput(result, format);
     });
 

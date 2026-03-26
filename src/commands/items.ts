@@ -45,13 +45,15 @@ export function registerItemsCommand(program: Command): void {
     .description('List items (GET /api/1/items/)')
     .option('--status <status>', 'Filter by status (active, resolved, muted, etc.)')
     .option('--level <level>', 'Filter by level (critical, error, warning, info, debug)')
+    .option('--environment <environment>', 'Filter by environment (e.g. production, staging)')
     .option('--page <page>', 'Page number')
-    .action(async (opts: { status?: string; level?: string; page?: string }) => {
+    .action(async (opts: { status?: string; level?: string; environment?: string; page?: string }) => {
       const token = program.opts().token ?? getProjectToken(program.opts().project);
       const format = program.opts().format as OutputFormat;
       const result = await get(token, '/api/1/items/', {
         status: opts.status,
         level: opts.level,
+        environment: opts.environment,
         page: opts.page,
       });
       printOutput(result, format);

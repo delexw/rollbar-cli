@@ -96,7 +96,7 @@ rollbar agent --compact # Compact version
 
 ```bash
 # Investigate active errors
-rollbar items list --status active --level error
+rollbar items list --status active --level error --environment production
 rollbar occurrences list-by-item <item-id>
 rollbar occurrences get <occurrence-id>
 
