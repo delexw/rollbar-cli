@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "oxfmt": "^0.41.0",
+    "oxfmt": "^0.42.0",
     "oxlint": "^1.51.0",
     "vitest": "^4.0.18"
   },
