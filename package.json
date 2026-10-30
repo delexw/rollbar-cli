@@ -33,16 +33,16 @@
     "publish:npm": "npm publish --access public"
   },
   "devDependencies": {
-    "@types/bun": "latest",
-    "oxfmt": "^0.45.0",
-    "oxlint": "^1.51.0",
-    "vitest": "^4.0.18"
+    "@types/bun": "^1.4.4",
+    "oxfmt": "^0.75.0",
+    "oxlint": "^1.90.0",
+    "vitest": "^5.0.5"
   },
   "peerDependencies": {
-    "typescript": "^5"
+    "typescript": "^7.0.2"
   },
   "dependencies": {
-    "@napi-rs/keyring": "^1.2.0",
-    "commander": "^14.0.3"
+    "@napi-rs/keyring": "^2.1.2",
+    "commander": "^15.0.0"
   }
 }
