@@ -56,6 +56,7 @@ export function registerItemsCommand(program: Command): void {
           level: opts.level,
           environment: opts.environment,
           page: opts.page,
+          project_ids: auth.projectId,
         });
         printOutput(result, format);
       },

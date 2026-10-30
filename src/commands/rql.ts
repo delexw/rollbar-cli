@@ -14,7 +14,10 @@ export function registerRqlCommand(program: Command): void {
     .action(async (opts: { query: string }) => {
       const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await post(auth, '/api/1/rql/jobs', { query_string: opts.query });
+      const result = await post(auth, '/api/1/rql/jobs', {
+        query_string: opts.query,
+        project_id: auth.projectId,
+      });
       printOutput(result, format);
     });
 
