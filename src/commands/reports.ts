@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { projectToken } from '../auth.ts';
+import { projectAuth } from '../auth.ts';
 import { get } from '../client.ts';
 import type { OutputFormat } from '../output.ts';
 import { printOutput } from '../output.ts';
@@ -13,9 +13,9 @@ export function registerReportsCommand(program: Command): void {
     .option('--hours <hours>', 'Number of hours to look back')
     .option('--environments <envs>', 'Comma-separated environments')
     .action(async (opts: { hours?: string; environments?: string }) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, '/api/1/reports/top_active_items', {
+      const result = await get(auth, '/api/1/reports/top_active_items', {
         hours: opts.hours,
         environments: opts.environments,
       });
@@ -28,9 +28,9 @@ export function registerReportsCommand(program: Command): void {
     .option('--hours <hours>', 'Number of hours to look back')
     .option('--bucket-size <size>', 'Bucket size in seconds')
     .action(async (opts: { hours?: string; bucketSize?: string }) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, '/api/1/reports/occurrence_counts', {
+      const result = await get(auth, '/api/1/reports/occurrence_counts', {
         hours: opts.hours,
         bucket_size: opts.bucketSize,
       });
@@ -43,9 +43,9 @@ export function registerReportsCommand(program: Command): void {
     .option('--hours <hours>', 'Number of hours to look back')
     .option('--bucket-size <size>', 'Bucket size in seconds')
     .action(async (opts: { hours?: string; bucketSize?: string }) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, '/api/1/reports/activated_counts', {
+      const result = await get(auth, '/api/1/reports/activated_counts', {
         hours: opts.hours,
         bucket_size: opts.bucketSize,
       });

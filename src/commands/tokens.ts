@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { projectToken } from '../auth.ts';
+import { projectAuth } from '../auth.ts';
 import { del, get, patch, post } from '../client.ts';
 import type { OutputFormat } from '../output.ts';
 import { parseJsonArg, printOutput } from '../output.ts';
@@ -12,9 +12,9 @@ export function registerTokensCommand(program: Command): void {
     .description('List access tokens (GET /api/1/project/:id/access_tokens)')
     .argument('<project-id>', 'Project ID')
     .action(async (projectId: string) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, `/api/1/project/${projectId}/access_tokens`);
+      const result = await get(auth, `/api/1/project/${projectId}/access_tokens`);
       printOutput(result, format);
     });
 
@@ -24,10 +24,10 @@ export function registerTokensCommand(program: Command): void {
     .argument('<project-id>', 'Project ID')
     .requiredOption('--data <json>', 'Token configuration as JSON')
     .action(async (projectId: string, opts: { data: string }) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
       const result = await post(
-        token,
+        auth,
         `/api/1/project/${projectId}/access_tokens`,
         parseJsonArg(opts.data),
       );
@@ -41,10 +41,10 @@ export function registerTokensCommand(program: Command): void {
     .argument('<access-token>', 'Access token to update')
     .requiredOption('--data <json>', 'Rate limit data as JSON')
     .action(async (projectId: string, accessToken: string, opts: { data: string }) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
       const result = await patch(
-        token,
+        auth,
         `/api/1/project/${projectId}/access_token/${accessToken}`,
         parseJsonArg(opts.data),
       );
@@ -57,9 +57,9 @@ export function registerTokensCommand(program: Command): void {
     .argument('<project-id>', 'Project ID')
     .argument('<access-token>', 'Access token to delete')
     .action(async (projectId: string, accessToken: string) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await del(token, `/api/1/project/${projectId}/access_token/${accessToken}`);
+      const result = await del(auth, `/api/1/project/${projectId}/access_token/${accessToken}`);
       printOutput(result, format);
     });
 
@@ -69,10 +69,10 @@ export function registerTokensCommand(program: Command): void {
     .argument('<project-id>', 'Project ID')
     .requiredOption('--data <json>', 'Rate limit data with token in body as JSON')
     .action(async (projectId: string, opts: { data: string }) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
       const result = await patch(
-        token,
+        auth,
         `/api/1/project/${projectId}/access_tokens`,
         parseJsonArg(opts.data),
       );
@@ -85,10 +85,10 @@ export function registerTokensCommand(program: Command): void {
     .argument('<project-id>', 'Project ID')
     .requiredOption('--data <json>', 'Token data in body as JSON')
     .action(async (projectId: string, opts: { data: string }) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
       const result = await del(
-        token,
+        auth,
         `/api/1/project/${projectId}/access_tokens`,
         parseJsonArg(opts.data),
       );

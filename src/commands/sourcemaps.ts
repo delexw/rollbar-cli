@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { basename } from 'path';
 import { Command } from 'commander';
-import { projectToken } from '../auth.ts';
+import { projectAuth } from '../auth.ts';
 import { postForm } from '../client.ts';
 import type { OutputFormat } from '../output.ts';
 import { printOutput } from '../output.ts';
@@ -15,15 +15,15 @@ export function registerSourcemapsCommand(program: Command): void {
     .option('--version <version>', 'Code version')
     .option('--minified-url <url>', 'URL of the minified file')
     .action(async (opts: { file: string; version?: string; minifiedUrl?: string }) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
       const form = new FormData();
       const fileContent = readFileSync(opts.file);
       form.append('source_map', new Blob([fileContent]), basename(opts.file));
-      form.append('access_token', token);
+      form.append('access_token', auth.token);
       if (opts.version) form.append('version', opts.version);
       if (opts.minifiedUrl) form.append('minified_url', opts.minifiedUrl);
-      const result = await postForm(token, '/api/1/sourcemap', form);
+      const result = await postForm(auth, '/api/1/sourcemap', form);
       printOutput(result, format);
     });
 
@@ -32,14 +32,14 @@ export function registerSourcemapsCommand(program: Command): void {
     .requiredOption('--file <path>', 'Path to dSYM zip file')
     .option('--version <version>', 'Code version')
     .action(async (opts: { file: string; version?: string }) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
       const form = new FormData();
       const fileContent = readFileSync(opts.file);
       form.append('dsym', new Blob([fileContent]), basename(opts.file));
-      form.append('access_token', token);
+      form.append('access_token', auth.token);
       if (opts.version) form.append('version', opts.version);
-      const result = await postForm(token, '/api/1/dsym', form);
+      const result = await postForm(auth, '/api/1/dsym', form);
       printOutput(result, format);
     });
 
@@ -48,14 +48,14 @@ export function registerSourcemapsCommand(program: Command): void {
     .requiredOption('--file <path>', 'Path to ProGuard mapping file')
     .option('--version <version>', 'Code version')
     .action(async (opts: { file: string; version?: string }) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
       const form = new FormData();
       const fileContent = readFileSync(opts.file);
       form.append('proguard', new Blob([fileContent]), basename(opts.file));
-      form.append('access_token', token);
+      form.append('access_token', auth.token);
       if (opts.version) form.append('version', opts.version);
-      const result = await postForm(token, '/api/1/proguard', form);
+      const result = await postForm(auth, '/api/1/proguard', form);
       printOutput(result, format);
     });
 
@@ -64,14 +64,14 @@ export function registerSourcemapsCommand(program: Command): void {
     .requiredOption('--file <path>', 'Path to Flutter symbols file')
     .option('--version <version>', 'Code version')
     .action(async (opts: { file: string; version?: string }) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
       const form = new FormData();
       const fileContent = readFileSync(opts.file);
       form.append('flutter_symbols', new Blob([fileContent]), basename(opts.file));
-      form.append('access_token', token);
+      form.append('access_token', auth.token);
       if (opts.version) form.append('version', opts.version);
-      const result = await postForm(token, '/api/1/flutter_symbols', form);
+      const result = await postForm(auth, '/api/1/flutter_symbols', form);
       printOutput(result, format);
     });
 }

@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { projectToken } from '../auth.ts';
+import { projectAuth } from '../auth.ts';
 import { del, get, post, put } from '../client.ts';
 import type { OutputFormat } from '../output.ts';
 import { parseJsonArg, printOutput } from '../output.ts';
@@ -10,9 +10,9 @@ export function registerServiceLinksCommand(program: Command): void {
   sl.command('list')
     .description('List service links (GET /api/1/service_links)')
     .action(async () => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, '/api/1/service_links');
+      const result = await get(auth, '/api/1/service_links');
       printOutput(result, format);
     });
 
@@ -20,9 +20,9 @@ export function registerServiceLinksCommand(program: Command): void {
     .description('Create a service link (POST /api/1/service_links)')
     .requiredOption('--data <json>', 'Service link data as JSON')
     .action(async (opts: { data: string }) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await post(token, '/api/1/service_links', parseJsonArg(opts.data));
+      const result = await post(auth, '/api/1/service_links', parseJsonArg(opts.data));
       printOutput(result, format);
     });
 
@@ -30,9 +30,9 @@ export function registerServiceLinksCommand(program: Command): void {
     .description('Get a service link (GET /api/1/service_links/:id)')
     .argument('<id>', 'Service link ID')
     .action(async (id: string) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, `/api/1/service_links/${id}`);
+      const result = await get(auth, `/api/1/service_links/${id}`);
       printOutput(result, format);
     });
 
@@ -41,9 +41,9 @@ export function registerServiceLinksCommand(program: Command): void {
     .argument('<id>', 'Service link ID')
     .requiredOption('--data <json>', 'Service link data as JSON')
     .action(async (id: string, opts: { data: string }) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await put(token, `/api/1/service_links/${id}`, parseJsonArg(opts.data));
+      const result = await put(auth, `/api/1/service_links/${id}`, parseJsonArg(opts.data));
       printOutput(result, format);
     });
 
@@ -51,9 +51,9 @@ export function registerServiceLinksCommand(program: Command): void {
     .description('Delete a service link (DELETE /api/1/service_links/:id)')
     .argument('<id>', 'Service link ID')
     .action(async (id: string) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await del(token, `/api/1/service_links/${id}`);
+      const result = await del(auth, `/api/1/service_links/${id}`);
       printOutput(result, format);
     });
 }

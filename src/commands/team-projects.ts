@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { accountToken } from '../auth.ts';
+import { accountAuth } from '../auth.ts';
 import { del, get, put } from '../client.ts';
 import type { OutputFormat } from '../output.ts';
 import { printOutput } from '../output.ts';
@@ -11,9 +11,9 @@ export function registerTeamProjectsCommand(program: Command): void {
     .description('List projects in a team (GET /api/1/team/:id/projects)')
     .argument('<team-id>', 'Team ID')
     .action(async (teamId: string) => {
-      const token = accountToken(program);
+      const auth = accountAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, `/api/1/team/${teamId}/projects`);
+      const result = await get(auth, `/api/1/team/${teamId}/projects`);
       printOutput(result, format);
     });
 
@@ -21,9 +21,9 @@ export function registerTeamProjectsCommand(program: Command): void {
     .description('List teams for a project (GET /api/1/project/:id/teams)')
     .argument('<project-id>', 'Project ID')
     .action(async (projectId: string) => {
-      const token = accountToken(program);
+      const auth = accountAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, `/api/1/project/${projectId}/teams`);
+      const result = await get(auth, `/api/1/project/${projectId}/teams`);
       printOutput(result, format);
     });
 
@@ -32,9 +32,9 @@ export function registerTeamProjectsCommand(program: Command): void {
     .argument('<team-id>', 'Team ID')
     .argument('<project-id>', 'Project ID')
     .action(async (teamId: string, projectId: string) => {
-      const token = accountToken(program);
+      const auth = accountAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, `/api/1/team/${teamId}/project/${projectId}`);
+      const result = await get(auth, `/api/1/team/${teamId}/project/${projectId}`);
       printOutput(result, format);
     });
 
@@ -43,9 +43,9 @@ export function registerTeamProjectsCommand(program: Command): void {
     .argument('<team-id>', 'Team ID')
     .argument('<project-id>', 'Project ID')
     .action(async (teamId: string, projectId: string) => {
-      const token = accountToken(program);
+      const auth = accountAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await put(token, `/api/1/team/${teamId}/project/${projectId}`);
+      const result = await put(auth, `/api/1/team/${teamId}/project/${projectId}`);
       printOutput(result, format);
     });
 
@@ -54,9 +54,9 @@ export function registerTeamProjectsCommand(program: Command): void {
     .argument('<team-id>', 'Team ID')
     .argument('<project-id>', 'Project ID')
     .action(async (teamId: string, projectId: string) => {
-      const token = accountToken(program);
+      const auth = accountAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await del(token, `/api/1/team/${teamId}/project/${projectId}`);
+      const result = await del(auth, `/api/1/team/${teamId}/project/${projectId}`);
       printOutput(result, format);
     });
 }

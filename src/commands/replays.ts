@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { projectToken } from '../auth.ts';
+import { projectAuth } from '../auth.ts';
 import { del, get } from '../client.ts';
 import type { OutputFormat } from '../output.ts';
 import { printOutput } from '../output.ts';
@@ -14,9 +14,9 @@ export function registerReplaysCommand(program: Command): void {
     .argument('<session-id>', 'Session ID')
     .argument('<replay-id>', 'Replay ID')
     .action(async (environment: string, sessionId: string, replayId: string) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, `/api/1/replay/${environment}/${sessionId}/${replayId}`);
+      const result = await get(auth, `/api/1/replay/${environment}/${sessionId}/${replayId}`);
       printOutput(result, format);
     });
 
@@ -27,9 +27,9 @@ export function registerReplaysCommand(program: Command): void {
     .argument('<session-id>', 'Session ID')
     .argument('<replay-id>', 'Replay ID')
     .action(async (environment: string, sessionId: string, replayId: string) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await del(token, `/api/1/replay/${environment}/${sessionId}/${replayId}`);
+      const result = await del(auth, `/api/1/replay/${environment}/${sessionId}/${replayId}`);
       printOutput(result, format);
     });
 }

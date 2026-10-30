@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { accountToken } from '../auth.ts';
+import { accountAuth } from '../auth.ts';
 import { del, get, post, put } from '../client.ts';
 import type { OutputFormat } from '../output.ts';
 import { printOutput } from '../output.ts';
@@ -11,9 +11,9 @@ export function registerTeamUsersCommand(program: Command): void {
     .description('List users in a team (GET /api/1/team/:id/users)')
     .argument('<team-id>', 'Team ID')
     .action(async (teamId: string) => {
-      const token = accountToken(program);
+      const auth = accountAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, `/api/1/team/${teamId}/users`);
+      const result = await get(auth, `/api/1/team/${teamId}/users`);
       printOutput(result, format);
     });
 
@@ -22,9 +22,9 @@ export function registerTeamUsersCommand(program: Command): void {
     .argument('<team-id>', 'Team ID')
     .argument('<user-id>', 'User ID')
     .action(async (teamId: string, userId: string) => {
-      const token = accountToken(program);
+      const auth = accountAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, `/api/1/team/${teamId}/user/${userId}`);
+      const result = await get(auth, `/api/1/team/${teamId}/user/${userId}`);
       printOutput(result, format);
     });
 
@@ -33,9 +33,9 @@ export function registerTeamUsersCommand(program: Command): void {
     .argument('<team-id>', 'Team ID')
     .argument('<user-id>', 'User ID')
     .action(async (teamId: string, userId: string) => {
-      const token = accountToken(program);
+      const auth = accountAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await put(token, `/api/1/team/${teamId}/user/${userId}`);
+      const result = await put(auth, `/api/1/team/${teamId}/user/${userId}`);
       printOutput(result, format);
     });
 
@@ -44,9 +44,9 @@ export function registerTeamUsersCommand(program: Command): void {
     .argument('<team-id>', 'Team ID')
     .argument('<user-id>', 'User ID')
     .action(async (teamId: string, userId: string) => {
-      const token = accountToken(program);
+      const auth = accountAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await del(token, `/api/1/team/${teamId}/user/${userId}`);
+      const result = await del(auth, `/api/1/team/${teamId}/user/${userId}`);
       printOutput(result, format);
     });
 
@@ -54,9 +54,9 @@ export function registerTeamUsersCommand(program: Command): void {
     .description("List a user's teams (GET /api/1/user/:id/teams)")
     .argument('<user-id>', 'User ID')
     .action(async (userId: string) => {
-      const token = accountToken(program);
+      const auth = accountAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, `/api/1/user/${userId}/teams`);
+      const result = await get(auth, `/api/1/user/${userId}/teams`);
       printOutput(result, format);
     });
 
@@ -64,9 +64,9 @@ export function registerTeamUsersCommand(program: Command): void {
     .description('List pending invitations for a team (GET /api/1/team/:id/invites)')
     .argument('<team-id>', 'Team ID')
     .action(async (teamId: string) => {
-      const token = accountToken(program);
+      const auth = accountAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, `/api/1/team/${teamId}/invites`);
+      const result = await get(auth, `/api/1/team/${teamId}/invites`);
       printOutput(result, format);
     });
 
@@ -75,9 +75,9 @@ export function registerTeamUsersCommand(program: Command): void {
     .argument('<team-id>', 'Team ID')
     .requiredOption('--email <email>', 'Email address to invite')
     .action(async (teamId: string, opts: { email: string }) => {
-      const token = accountToken(program);
+      const auth = accountAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await post(token, `/api/1/team/${teamId}/invites`, { email: opts.email });
+      const result = await post(auth, `/api/1/team/${teamId}/invites`, { email: opts.email });
       printOutput(result, format);
     });
 
@@ -85,9 +85,9 @@ export function registerTeamUsersCommand(program: Command): void {
     .description('Get invitation details (GET /api/1/invite/:id)')
     .argument('<invite-id>', 'Invitation ID')
     .action(async (inviteId: string) => {
-      const token = accountToken(program);
+      const auth = accountAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, `/api/1/invite/${inviteId}`);
+      const result = await get(auth, `/api/1/invite/${inviteId}`);
       printOutput(result, format);
     });
 
@@ -95,9 +95,9 @@ export function registerTeamUsersCommand(program: Command): void {
     .description('Cancel an invitation (DELETE /api/1/invite/:id)')
     .argument('<invite-id>', 'Invitation ID')
     .action(async (inviteId: string) => {
-      const token = accountToken(program);
+      const auth = accountAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await del(token, `/api/1/invite/${inviteId}`);
+      const result = await del(auth, `/api/1/invite/${inviteId}`);
       printOutput(result, format);
     });
 }

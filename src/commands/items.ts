@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { projectToken } from '../auth.ts';
+import { projectAuth } from '../auth.ts';
 import { get, patch, post } from '../client.ts';
 import type { OutputFormat } from '../output.ts';
 import { parseJsonArg, printOutput } from '../output.ts';
@@ -12,9 +12,9 @@ export function registerItemsCommand(program: Command): void {
     .description('Create a new item (POST /api/1/item/)')
     .requiredOption('--data <json>', 'Item data as JSON')
     .action(async (opts: { data: string }) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await post(token, '/api/1/item/', parseJsonArg(opts.data));
+      const result = await post(auth, '/api/1/item/', parseJsonArg(opts.data));
       printOutput(result, format);
     });
 
@@ -25,15 +25,15 @@ export function registerItemsCommand(program: Command): void {
     .option('--uuid <uuid>', 'Item UUID')
     .option('--counter <counter>', 'Item project counter')
     .action(async (opts: { id?: string; uuid?: string; counter?: string }) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
       let result: unknown;
       if (opts.id) {
-        result = await get(token, `/api/1/item/${opts.id}`);
+        result = await get(auth, `/api/1/item/${opts.id}`);
       } else if (opts.uuid) {
-        result = await get(token, '/api/1/item_by_uuid', { uuid: opts.uuid });
+        result = await get(auth, '/api/1/item_by_uuid', { uuid: opts.uuid });
       } else if (opts.counter) {
-        result = await get(token, '/api/1/item_by_counter', { counter: opts.counter });
+        result = await get(auth, '/api/1/item_by_counter', { counter: opts.counter });
       } else {
         throw new Error('Provide one of --id, --uuid, or --counter');
       }
@@ -49,9 +49,9 @@ export function registerItemsCommand(program: Command): void {
     .option('--page <page>', 'Page number')
     .action(
       async (opts: { status?: string; level?: string; environment?: string; page?: string }) => {
-        const token = projectToken(program);
+        const auth = await projectAuth(program);
         const format = program.opts().format as OutputFormat;
-        const result = await get(token, '/api/1/items/', {
+        const result = await get(auth, '/api/1/items/', {
           status: opts.status,
           level: opts.level,
           environment: opts.environment,
@@ -67,9 +67,9 @@ export function registerItemsCommand(program: Command): void {
     .argument('<id>', 'Item ID')
     .requiredOption('--data <json>', 'Update data as JSON')
     .action(async (id: string, opts: { data: string }) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await patch(token, `/api/1/item/${id}`, parseJsonArg(opts.data));
+      const result = await patch(auth, `/api/1/item/${id}`, parseJsonArg(opts.data));
       printOutput(result, format);
     });
 }

@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { projectToken } from '../auth.ts';
+import { projectAuth } from '../auth.ts';
 import { get, post } from '../client.ts';
 import type { OutputFormat } from '../output.ts';
 import { printOutput } from '../output.ts';
@@ -12,9 +12,9 @@ export function registerPeopleCommand(program: Command): void {
     .description('Request deletion of person data (POST /api/1/person/delete)')
     .requiredOption('--person-id <id>', 'Person ID to delete')
     .action(async (opts: { personId: string }) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await post(token, '/api/1/person/delete', { person_id: opts.personId });
+      const result = await post(auth, '/api/1/person/delete', { person_id: opts.personId });
       printOutput(result, format);
     });
 
@@ -23,9 +23,9 @@ export function registerPeopleCommand(program: Command): void {
     .description('Check person deletion status (GET /api/1/person/delete/status)')
     .requiredOption('--person-id <id>', 'Person ID to check')
     .action(async (opts: { personId: string }) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, '/api/1/person/delete/status', {
+      const result = await get(auth, '/api/1/person/delete/status', {
         person_id: opts.personId,
       });
       printOutput(result, format);

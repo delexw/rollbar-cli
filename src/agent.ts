@@ -9,21 +9,24 @@ You have access to the \`rollbar\` CLI tool which wraps the full Rollbar API v1 
 Before using API commands, configure authentication:
 
 \`\`\`bash
-# Set a project access token (for most endpoints)
-rollbar config set-token <project-name> <access-token>
-
-# Set a global account-level token (for teams, users, projects management)
+# One account token (personal or service) reaches every project it can access
 rollbar config set-account-token <account-token>
+rollbar projects list                              # Projects the account token can reach
+
+# Optional: a per-project access token, used instead of the account token for that project
+rollbar config set-token <project-name> <access-token>
 
 # Set the default project
 rollbar config set-default <project-name>
 \`\`\`
 
+Project commands pick a token in this order: \`--token\`, the project's own stored token, then the account token sent with that project's \`project_id\`. With the account token, \`--project\` takes a project name from \`rollbar projects list\` or a numeric project ID.
+
 You can also pass tokens inline: \`rollbar --token <token> items list\`
 
 ## Global Options
 
-- \`--project <name>\` — Use a specific project's token
+- \`--project <name|id>\` — Use a specific project (its own token, or the account token with its project ID)
 - \`--token <token>\` — Override with an explicit access token
 - \`--account-token <token>\` — Override with an explicit account token
 - \`--format <json|table|plain>\` — Output format (default: json)
@@ -236,14 +239,15 @@ rollbar reports occurrence-counts --hours 24
 - All \`--data\` arguments accept JSON strings
 - Most list commands support \`--page\` for pagination
 - Output is JSON by default (best for programmatic use)
-- Project-level commands use the project access token
+- Project-level commands use the project access token, or the account token with the project's ID when the project has no token of its own
+- To cover every project, list them with \`rollbar projects list\` and query each with \`--project <name|id>\`
 - Account-level commands (teams, users, projects) require a global account token set via \`rollbar config set-account-token\`
 `;
 
 const COMPACT_PROMPT = `# Rollbar CLI Reference (Compact)
 
-CLI wrapping Rollbar API v1. Auth: \`rollbar config set-token <project> <token>\`
-Global: \`--project <name>\`, \`--token <token>\`, \`--format json|table|plain\`
+CLI wrapping Rollbar API v1. Auth: \`rollbar config set-account-token <token>\` (all projects) or \`rollbar config set-token <project> <token>\`
+Global: \`--project <name|id>\`, \`--token <token>\`, \`--format json|table|plain\`
 
 Commands: config, items, occurrences, metrics, deploys, environments, sourcemaps, rql, reports, projects, tokens, teams, users, team-users, team-projects, user-projects, people, notifications, replays, service-links, versions
 

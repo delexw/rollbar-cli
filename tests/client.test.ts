@@ -25,7 +25,7 @@ describe('client', () => {
     it('sends GET request with auth header', async () => {
       mockResponse({ err: 0, result: { id: 1 } });
 
-      const result = await get('my-token', '/api/1/items/');
+      const result = await get({ token: 'my-token' }, '/api/1/items/');
 
       expect(mockFetch).toHaveBeenCalledOnce();
       const [url, opts] = mockFetch.mock.calls[0]!;
@@ -38,17 +38,36 @@ describe('client', () => {
     it('appends query parameters', async () => {
       mockResponse({ err: 0, result: [] });
 
-      await get('tok', '/api/1/items/', { status: 'active', page: 2 });
+      await get({ token: 'tok' }, '/api/1/items/', { status: 'active', page: 2 });
 
       const [url] = mockFetch.mock.calls[0]!;
       expect(url).toContain('status=active');
       expect(url).toContain('page=2');
     });
 
+    it('adds project_id when the auth carries a project', async () => {
+      mockResponse({ err: 0, result: [] });
+
+      await get({ token: 'acct', projectId: 42 }, '/api/1/items/', { status: 'active' });
+
+      const [url, opts] = mockFetch.mock.calls[0]!;
+      expect(url).toBe('https://api.rollbar.com/api/1/items/?status=active&project_id=42');
+      expect(opts.headers['X-Rollbar-Access-Token']).toBe('acct');
+    });
+
+    it('omits project_id when the auth carries no project', async () => {
+      mockResponse({ err: 0, result: [] });
+
+      await get({ token: 'tok' }, '/api/1/items/');
+
+      const [url] = mockFetch.mock.calls[0]!;
+      expect(url).not.toContain('project_id');
+    });
+
     it('skips undefined query parameters', async () => {
       mockResponse({ err: 0, result: [] });
 
-      await get('tok', '/api/1/items/', { status: 'active', level: undefined });
+      await get({ token: 'tok' }, '/api/1/items/', { status: 'active', level: undefined });
 
       const [url] = mockFetch.mock.calls[0]!;
       expect(url).toContain('status=active');
@@ -60,7 +79,7 @@ describe('client', () => {
     it('sends POST request with JSON body', async () => {
       mockResponse({ err: 0, result: { id: 42 } });
 
-      const result = await post('tok', '/api/1/item/', { title: 'Bug' });
+      const result = await post({ token: 'tok' }, '/api/1/item/', { title: 'Bug' });
 
       const [, opts] = mockFetch.mock.calls[0]!;
       expect(opts.method).toBe('POST');
@@ -74,7 +93,7 @@ describe('client', () => {
     it('sends PATCH request', async () => {
       mockResponse({ err: 0, result: { updated: true } });
 
-      await patch('tok', '/api/1/item/1', { status: 'resolved' });
+      await patch({ token: 'tok' }, '/api/1/item/1', { status: 'resolved' });
 
       const [, opts] = mockFetch.mock.calls[0]!;
       expect(opts.method).toBe('PATCH');
@@ -85,7 +104,7 @@ describe('client', () => {
     it('sends PUT request', async () => {
       mockResponse({ err: 0, result: {} });
 
-      await put('tok', '/api/1/team/1/user/2');
+      await put({ token: 'tok' }, '/api/1/team/1/user/2');
 
       const [, opts] = mockFetch.mock.calls[0]!;
       expect(opts.method).toBe('PUT');
@@ -96,7 +115,7 @@ describe('client', () => {
     it('sends DELETE request', async () => {
       mockResponse({ err: 0, result: {} });
 
-      await del('tok', '/api/1/instance/123');
+      await del({ token: 'tok' }, '/api/1/instance/123');
 
       const [, opts] = mockFetch.mock.calls[0]!;
       expect(opts.method).toBe('DELETE');
@@ -105,7 +124,7 @@ describe('client', () => {
     it('sends DELETE with body', async () => {
       mockResponse({ err: 0, result: {} });
 
-      await del('tok', '/api/1/project/1/access_tokens', { access_token: 'xyz' });
+      await del({ token: 'tok' }, '/api/1/project/1/access_tokens', { access_token: 'xyz' });
 
       const [, opts] = mockFetch.mock.calls[0]!;
       expect(opts.method).toBe('DELETE');
@@ -120,7 +139,7 @@ describe('client', () => {
       const form = new FormData();
       form.append('file', 'content');
 
-      await postForm('tok', '/api/1/sourcemap', form);
+      await postForm({ token: 'tok' }, '/api/1/sourcemap', form);
 
       const [, opts] = mockFetch.mock.calls[0]!;
       expect(opts.method).toBe('POST');
@@ -133,13 +152,15 @@ describe('client', () => {
     it('throws on API error response', async () => {
       mockResponse({ err: 1, message: 'access denied' });
 
-      await expect(get('tok', '/api/1/items/')).rejects.toThrow('Rollbar API error: access denied');
+      await expect(get({ token: 'tok' }, '/api/1/items/')).rejects.toThrow(
+        'Rollbar API error: access denied',
+      );
     });
 
     it('throws on API error with no message', async () => {
       mockResponse({ err: 1 });
 
-      await expect(get('tok', '/api/1/items/')).rejects.toThrow('Unknown error');
+      await expect(get({ token: 'tok' }, '/api/1/items/')).rejects.toThrow('Unknown error');
     });
 
     it('throws on non-JSON error response', async () => {
@@ -149,7 +170,9 @@ describe('client', () => {
         text: () => Promise.resolve('Internal Server Error'),
       });
 
-      await expect(get('tok', '/api/1/items/')).rejects.toThrow('HTTP 500: Internal Server Error');
+      await expect(get({ token: 'tok' }, '/api/1/items/')).rejects.toThrow(
+        'HTTP 500: Internal Server Error',
+      );
     });
 
     it('returns text as-is for non-JSON success response', async () => {
@@ -159,7 +182,7 @@ describe('client', () => {
         text: () => Promise.resolve('OK'),
       });
 
-      const result = await get('tok', '/api/1/something');
+      const result = await get({ token: 'tok' }, '/api/1/something');
       expect(result).toBe('OK');
     });
   });

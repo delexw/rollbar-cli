@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { projectToken } from '../auth.ts';
+import { projectAuth } from '../auth.ts';
 import { get } from '../client.ts';
 import type { OutputFormat } from '../output.ts';
 import { printOutput } from '../output.ts';
@@ -11,9 +11,9 @@ export function registerEnvironmentsCommand(program: Command): void {
     .command('list')
     .description('List all environments (GET /api/1/environments/)')
     .action(async () => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, '/api/1/environments/');
+      const result = await get(auth, '/api/1/environments/');
       printOutput(result, format);
     });
 }

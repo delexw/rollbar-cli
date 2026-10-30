@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { projectToken } from '../auth.ts';
+import { projectAuth } from '../auth.ts';
 import { get, patch, post } from '../client.ts';
 import type { OutputFormat } from '../output.ts';
 import { parseJsonArg, printOutput } from '../output.ts';
@@ -12,9 +12,9 @@ export function registerDeploysCommand(program: Command): void {
     .description('Create a deploy (POST /api/1/deploy/)')
     .requiredOption('--data <json>', 'Deploy data as JSON')
     .action(async (opts: { data: string }) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await post(token, '/api/1/deploy/', parseJsonArg(opts.data));
+      const result = await post(auth, '/api/1/deploy/', parseJsonArg(opts.data));
       printOutput(result, format);
     });
 
@@ -23,9 +23,9 @@ export function registerDeploysCommand(program: Command): void {
     .description('Get a deploy (GET /api/1/deploy/:id)')
     .argument('<deploy-id>', 'Deploy ID')
     .action(async (deployId: string) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, `/api/1/deploy/${deployId}`);
+      const result = await get(auth, `/api/1/deploy/${deployId}`);
       printOutput(result, format);
     });
 
@@ -35,9 +35,9 @@ export function registerDeploysCommand(program: Command): void {
     .argument('<deploy-id>', 'Deploy ID')
     .requiredOption('--data <json>', 'Update data as JSON')
     .action(async (deployId: string, opts: { data: string }) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await patch(token, `/api/1/deploy/${deployId}`, parseJsonArg(opts.data));
+      const result = await patch(auth, `/api/1/deploy/${deployId}`, parseJsonArg(opts.data));
       printOutput(result, format);
     });
 
@@ -46,9 +46,9 @@ export function registerDeploysCommand(program: Command): void {
     .description('List deploys (GET /api/1/deploys/)')
     .option('--page <page>', 'Page number')
     .action(async (opts: { page?: string }) => {
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, '/api/1/deploys/', { page: opts.page });
+      const result = await get(auth, '/api/1/deploys/', { page: opts.page });
       printOutput(result, format);
     });
 }

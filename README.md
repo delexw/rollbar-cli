@@ -27,15 +27,24 @@ bun run dev -- <command>
 
 ## Setup
 
-Configure a project access token before using API commands:
+The simplest setup is one account access token (a personal or service token from **Settings → API access tokens** in Rollbar). It reaches every project it has access to:
+
+```bash
+rollbar config set-account-token <account-token>
+rollbar projects list                          # see the projects it can reach
+rollbar --project <name|id> items list         # query any of them
+```
+
+When a project command runs without a project token, the CLI sends the account token with that project's `project_id`, looking the ID up by name from `rollbar projects list` (a numeric `--project` is used as the ID directly). A personal token only reaches the projects its user can reach in Rollbar.
+
+You can still store a per-project access token. When a project has one, it is used instead of the account token:
 
 ```bash
 rollbar config set-token <project-name> <access-token>
 rollbar config set-default <project-name>
-
-# For account-level commands (teams, users, projects) — one global token
-rollbar config set-account-token <account-token>
 ```
+
+Token order for project commands: `--token`, then the project's own stored token, then `--account-token` or the stored account token.
 
 Tokens are stored securely in your OS keychain via [`@napi-rs/keyring`](https://www.npmjs.com/package/@napi-rs/keyring) (macOS Keychain, Windows Credential Manager, Linux Secret Service). Only project names and the default project setting are stored in `~/.rollbar-cli/config.json` — no tokens are written to disk.
 
@@ -49,7 +58,7 @@ rollbar --token <token> items list
 
 | Option | Description |
 |---|---|
-| `--project <name>` | Use a specific project's token |
+| `--project <name\|id>` | Use a specific project (its own token, or the account token with its project ID) |
 | `--token <token>` | Override with an explicit access token |
 | `--account-token <token>` | Override with an explicit account-level token |
 | `--format <json\|table\|plain>` | Output format (default: `json`) |

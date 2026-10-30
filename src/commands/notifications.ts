@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { projectToken } from '../auth.ts';
+import { projectAuth } from '../auth.ts';
 import { del, get, post, put } from '../client.ts';
 import type { OutputFormat } from '../output.ts';
 import { parseJsonArg, printOutput } from '../output.ts';
@@ -25,9 +25,9 @@ export function registerNotificationsCommand(program: Command): void {
     .requiredOption('--data <json>', 'Channel configuration as JSON')
     .action(async (channel: string, opts: { data: string }) => {
       validateChannel(channel);
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await put(token, `/api/1/notifications/${channel}`, parseJsonArg(opts.data));
+      const result = await put(auth, `/api/1/notifications/${channel}`, parseJsonArg(opts.data));
       printOutput(result, format);
     });
 
@@ -39,9 +39,9 @@ export function registerNotificationsCommand(program: Command): void {
     .argument('<channel>', 'Channel: slack, webhook, pagerduty, email')
     .action(async (channel: string) => {
       validateChannel(channel);
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, `/api/1/notifications/${channel}/rules`);
+      const result = await get(auth, `/api/1/notifications/${channel}/rules`);
       printOutput(result, format);
     });
 
@@ -52,10 +52,10 @@ export function registerNotificationsCommand(program: Command): void {
     .requiredOption('--data <json>', 'Rule data as JSON')
     .action(async (channel: string, opts: { data: string }) => {
       validateChannel(channel);
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
       const result = await post(
-        token,
+        auth,
         `/api/1/notifications/${channel}/rules`,
         parseJsonArg(opts.data),
       );
@@ -69,10 +69,10 @@ export function registerNotificationsCommand(program: Command): void {
     .requiredOption('--data <json>', 'Rules array as JSON')
     .action(async (channel: string, opts: { data: string }) => {
       validateChannel(channel);
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
       const result = await put(
-        token,
+        auth,
         `/api/1/notifications/${channel}/rules`,
         parseJsonArg(opts.data),
       );
@@ -86,9 +86,9 @@ export function registerNotificationsCommand(program: Command): void {
     .argument('<rule-id>', 'Rule ID')
     .action(async (channel: string, ruleId: string) => {
       validateChannel(channel);
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, `/api/1/notifications/${channel}/rule/${ruleId}`);
+      const result = await get(auth, `/api/1/notifications/${channel}/rule/${ruleId}`);
       printOutput(result, format);
     });
 
@@ -100,10 +100,10 @@ export function registerNotificationsCommand(program: Command): void {
     .requiredOption('--data <json>', 'Rule data as JSON')
     .action(async (channel: string, ruleId: string, opts: { data: string }) => {
       validateChannel(channel);
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
       const result = await put(
-        token,
+        auth,
         `/api/1/notifications/${channel}/rule/${ruleId}`,
         parseJsonArg(opts.data),
       );
@@ -117,9 +117,9 @@ export function registerNotificationsCommand(program: Command): void {
     .argument('<rule-id>', 'Rule ID')
     .action(async (channel: string, ruleId: string) => {
       validateChannel(channel);
-      const token = projectToken(program);
+      const auth = await projectAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await del(token, `/api/1/notifications/${channel}/rule/${ruleId}`);
+      const result = await del(auth, `/api/1/notifications/${channel}/rule/${ruleId}`);
       printOutput(result, format);
     });
 }

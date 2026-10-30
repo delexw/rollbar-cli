@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { accountToken } from '../auth.ts';
+import { accountAuth } from '../auth.ts';
 import { del, get, post } from '../client.ts';
 import type { OutputFormat } from '../output.ts';
 import { printOutput } from '../output.ts';
@@ -13,9 +13,9 @@ export function registerTeamsCommand(program: Command): void {
     .requiredOption('--name <name>', 'Team name')
     .requiredOption('--access-level <level>', 'Access level (standard, light, view)')
     .action(async (opts: { name: string; accessLevel: string }) => {
-      const token = accountToken(program);
+      const auth = accountAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await post(token, '/api/1/teams', {
+      const result = await post(auth, '/api/1/teams', {
         name: opts.name,
         access_level: opts.accessLevel,
       });
@@ -26,9 +26,9 @@ export function registerTeamsCommand(program: Command): void {
     .command('list')
     .description('List all teams (GET /api/1/teams)')
     .action(async () => {
-      const token = accountToken(program);
+      const auth = accountAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, '/api/1/teams');
+      const result = await get(auth, '/api/1/teams');
       printOutput(result, format);
     });
 
@@ -37,9 +37,9 @@ export function registerTeamsCommand(program: Command): void {
     .description('Get a team (GET /api/1/team/:id)')
     .argument('<team-id>', 'Team ID')
     .action(async (teamId: string) => {
-      const token = accountToken(program);
+      const auth = accountAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, `/api/1/team/${teamId}`);
+      const result = await get(auth, `/api/1/team/${teamId}`);
       printOutput(result, format);
     });
 
@@ -48,9 +48,9 @@ export function registerTeamsCommand(program: Command): void {
     .description('Delete a team (DELETE /api/1/team/:id)')
     .argument('<team-id>', 'Team ID')
     .action(async (teamId: string) => {
-      const token = accountToken(program);
+      const auth = accountAuth(program);
       const format = program.opts().format as OutputFormat;
-      const result = await del(token, `/api/1/team/${teamId}`);
+      const result = await del(auth, `/api/1/team/${teamId}`);
       printOutput(result, format);
     });
 }
