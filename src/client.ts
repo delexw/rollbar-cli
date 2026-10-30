@@ -40,7 +40,7 @@ async function request<T = unknown>(opts: RequestOptions): Promise<T> {
     'X-Rollbar-Access-Token': auth.token,
   };
 
-  let fetchBody: BodyInit | undefined;
+  let fetchBody: RequestInit['body'];
   if (formData) {
     fetchBody = formData;
   } else if (body) {
