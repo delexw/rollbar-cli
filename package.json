@@ -19,6 +19,9 @@
   "bin": {
     "rollbar": "./dist/rollbar.js"
   },
+  "engines": {
+    "node": ">=26"
+  },
   "files": [
     "dist"
   ],

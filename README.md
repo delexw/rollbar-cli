@@ -4,6 +4,7 @@ A TypeScript CLI tool wrapping the full Rollbar API v1 (93 endpoints across 24 c
 
 ## Prerequisites
 
+- [Node.js](https://nodejs.org/) v26+ (pinned to 26.13.0 in `.tool-versions`)
 - [Bun](https://bun.sh/) v1.x+
 
 ## Installation
