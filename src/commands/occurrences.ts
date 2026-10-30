@@ -1,6 +1,6 @@
 import { Command } from 'commander';
+import { projectToken } from '../auth.ts';
 import { del, get } from '../client.ts';
-import { getProjectToken } from '../config.ts';
 import type { OutputFormat } from '../output.ts';
 import { printOutput } from '../output.ts';
 
@@ -11,12 +11,19 @@ export function registerOccurrencesCommand(program: Command): void {
     .command('list')
     .description('List all occurrences (GET /api/1/instances)')
     .option('--page <page>', 'Page number (default 1)')
-    .option('--last-id <lastId>', 'Return next 20 instances after this occurrence ID (overrides --page)')
+    .option(
+      '--last-id <lastId>',
+      'Return next 20 instances after this occurrence ID (overrides --page)',
+    )
     .option('--limit <limit>', 'Number of results per page (default 20, max 5000)')
     .action(async (opts: { page?: string; lastId?: string; limit?: string }) => {
-      const token = program.opts().token ?? getProjectToken(program.opts().project);
+      const token = projectToken(program);
       const format = program.opts().format as OutputFormat;
-      const result = await get(token, '/api/1/instances', { page: opts.page, lastId: opts.lastId, limit: opts.limit });
+      const result = await get(token, '/api/1/instances', {
+        page: opts.page,
+        lastId: opts.lastId,
+        limit: opts.limit,
+      });
       printOutput(result, format);
     });
 
@@ -26,7 +33,7 @@ export function registerOccurrencesCommand(program: Command): void {
     .argument('<item-id>', 'Item ID')
     .option('--page <page>', 'Page number')
     .action(async (itemId: string, opts: { page?: string }) => {
-      const token = program.opts().token ?? getProjectToken(program.opts().project);
+      const token = projectToken(program);
       const format = program.opts().format as OutputFormat;
       const result = await get(token, `/api/1/item/${itemId}/instances`, { page: opts.page });
       printOutput(result, format);
@@ -37,7 +44,7 @@ export function registerOccurrencesCommand(program: Command): void {
     .description('Get a single occurrence (GET /api/1/instance/:id)')
     .argument('<id>', 'Occurrence ID')
     .action(async (id: string) => {
-      const token = program.opts().token ?? getProjectToken(program.opts().project);
+      const token = projectToken(program);
       const format = program.opts().format as OutputFormat;
       const result = await get(token, `/api/1/instance/${id}`);
       printOutput(result, format);
@@ -48,7 +55,7 @@ export function registerOccurrencesCommand(program: Command): void {
     .description('Delete an occurrence (DELETE /api/1/instance/:id)')
     .argument('<id>', 'Occurrence ID')
     .action(async (id: string) => {
-      const token = program.opts().token ?? getProjectToken(program.opts().project);
+      const token = projectToken(program);
       const format = program.opts().format as OutputFormat;
       const result = await del(token, `/api/1/instance/${id}`);
       printOutput(result, format);

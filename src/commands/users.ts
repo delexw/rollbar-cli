@@ -1,6 +1,6 @@
 import { Command } from 'commander';
+import { accountToken } from '../auth.ts';
 import { get } from '../client.ts';
-import { getAccountToken } from '../config.ts';
 import type { OutputFormat } from '../output.ts';
 import { printOutput } from '../output.ts';
 
@@ -11,7 +11,7 @@ export function registerUsersCommand(program: Command): void {
     .command('list')
     .description('List all users (GET /api/1/users)')
     .action(async () => {
-      const token = program.opts().accountToken ?? getAccountToken();
+      const token = accountToken(program);
       const format = program.opts().format as OutputFormat;
       const result = await get(token, '/api/1/users');
       printOutput(result, format);
@@ -22,7 +22,7 @@ export function registerUsersCommand(program: Command): void {
     .description('Get a user (GET /api/1/user/:id)')
     .argument('<user-id>', 'User ID')
     .action(async (userId: string) => {
-      const token = program.opts().accountToken ?? getAccountToken();
+      const token = accountToken(program);
       const format = program.opts().format as OutputFormat;
       const result = await get(token, `/api/1/user/${userId}`);
       printOutput(result, format);

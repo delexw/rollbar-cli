@@ -1,6 +1,6 @@
 import { Command } from 'commander';
+import { projectToken } from '../auth.ts';
 import { get, patch, post } from '../client.ts';
-import { getProjectToken } from '../config.ts';
 import type { OutputFormat } from '../output.ts';
 import { parseJsonArg, printOutput } from '../output.ts';
 
@@ -12,7 +12,7 @@ export function registerItemsCommand(program: Command): void {
     .description('Create a new item (POST /api/1/item/)')
     .requiredOption('--data <json>', 'Item data as JSON')
     .action(async (opts: { data: string }) => {
-      const token = program.opts().token ?? getProjectToken(program.opts().project);
+      const token = projectToken(program);
       const format = program.opts().format as OutputFormat;
       const result = await post(token, '/api/1/item/', parseJsonArg(opts.data));
       printOutput(result, format);
@@ -25,7 +25,7 @@ export function registerItemsCommand(program: Command): void {
     .option('--uuid <uuid>', 'Item UUID')
     .option('--counter <counter>', 'Item project counter')
     .action(async (opts: { id?: string; uuid?: string; counter?: string }) => {
-      const token = program.opts().token ?? getProjectToken(program.opts().project);
+      const token = projectToken(program);
       const format = program.opts().format as OutputFormat;
       let result: unknown;
       if (opts.id) {
@@ -47,17 +47,19 @@ export function registerItemsCommand(program: Command): void {
     .option('--level <level>', 'Filter by level (critical, error, warning, info, debug)')
     .option('--environment <environment>', 'Filter by environment (e.g. production, staging)')
     .option('--page <page>', 'Page number')
-    .action(async (opts: { status?: string; level?: string; environment?: string; page?: string }) => {
-      const token = program.opts().token ?? getProjectToken(program.opts().project);
-      const format = program.opts().format as OutputFormat;
-      const result = await get(token, '/api/1/items/', {
-        status: opts.status,
-        level: opts.level,
-        environment: opts.environment,
-        page: opts.page,
-      });
-      printOutput(result, format);
-    });
+    .action(
+      async (opts: { status?: string; level?: string; environment?: string; page?: string }) => {
+        const token = projectToken(program);
+        const format = program.opts().format as OutputFormat;
+        const result = await get(token, '/api/1/items/', {
+          status: opts.status,
+          level: opts.level,
+          environment: opts.environment,
+          page: opts.page,
+        });
+        printOutput(result, format);
+      },
+    );
 
   items
     .command('update')
@@ -65,7 +67,7 @@ export function registerItemsCommand(program: Command): void {
     .argument('<id>', 'Item ID')
     .requiredOption('--data <json>', 'Update data as JSON')
     .action(async (id: string, opts: { data: string }) => {
-      const token = program.opts().token ?? getProjectToken(program.opts().project);
+      const token = projectToken(program);
       const format = program.opts().format as OutputFormat;
       const result = await patch(token, `/api/1/item/${id}`, parseJsonArg(opts.data));
       printOutput(result, format);

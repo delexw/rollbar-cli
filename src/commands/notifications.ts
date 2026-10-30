@@ -1,6 +1,6 @@
 import { Command } from 'commander';
+import { projectToken } from '../auth.ts';
 import { del, get, post, put } from '../client.ts';
-import { getProjectToken } from '../config.ts';
 import type { OutputFormat } from '../output.ts';
 import { parseJsonArg, printOutput } from '../output.ts';
 
@@ -25,7 +25,7 @@ export function registerNotificationsCommand(program: Command): void {
     .requiredOption('--data <json>', 'Channel configuration as JSON')
     .action(async (channel: string, opts: { data: string }) => {
       validateChannel(channel);
-      const token = program.opts().token ?? getProjectToken(program.opts().project);
+      const token = projectToken(program);
       const format = program.opts().format as OutputFormat;
       const result = await put(token, `/api/1/notifications/${channel}`, parseJsonArg(opts.data));
       printOutput(result, format);
@@ -39,7 +39,7 @@ export function registerNotificationsCommand(program: Command): void {
     .argument('<channel>', 'Channel: slack, webhook, pagerduty, email')
     .action(async (channel: string) => {
       validateChannel(channel);
-      const token = program.opts().token ?? getProjectToken(program.opts().project);
+      const token = projectToken(program);
       const format = program.opts().format as OutputFormat;
       const result = await get(token, `/api/1/notifications/${channel}/rules`);
       printOutput(result, format);
@@ -52,7 +52,7 @@ export function registerNotificationsCommand(program: Command): void {
     .requiredOption('--data <json>', 'Rule data as JSON')
     .action(async (channel: string, opts: { data: string }) => {
       validateChannel(channel);
-      const token = program.opts().token ?? getProjectToken(program.opts().project);
+      const token = projectToken(program);
       const format = program.opts().format as OutputFormat;
       const result = await post(
         token,
@@ -69,7 +69,7 @@ export function registerNotificationsCommand(program: Command): void {
     .requiredOption('--data <json>', 'Rules array as JSON')
     .action(async (channel: string, opts: { data: string }) => {
       validateChannel(channel);
-      const token = program.opts().token ?? getProjectToken(program.opts().project);
+      const token = projectToken(program);
       const format = program.opts().format as OutputFormat;
       const result = await put(
         token,
@@ -86,7 +86,7 @@ export function registerNotificationsCommand(program: Command): void {
     .argument('<rule-id>', 'Rule ID')
     .action(async (channel: string, ruleId: string) => {
       validateChannel(channel);
-      const token = program.opts().token ?? getProjectToken(program.opts().project);
+      const token = projectToken(program);
       const format = program.opts().format as OutputFormat;
       const result = await get(token, `/api/1/notifications/${channel}/rule/${ruleId}`);
       printOutput(result, format);
@@ -100,7 +100,7 @@ export function registerNotificationsCommand(program: Command): void {
     .requiredOption('--data <json>', 'Rule data as JSON')
     .action(async (channel: string, ruleId: string, opts: { data: string }) => {
       validateChannel(channel);
-      const token = program.opts().token ?? getProjectToken(program.opts().project);
+      const token = projectToken(program);
       const format = program.opts().format as OutputFormat;
       const result = await put(
         token,
@@ -117,7 +117,7 @@ export function registerNotificationsCommand(program: Command): void {
     .argument('<rule-id>', 'Rule ID')
     .action(async (channel: string, ruleId: string) => {
       validateChannel(channel);
-      const token = program.opts().token ?? getProjectToken(program.opts().project);
+      const token = projectToken(program);
       const format = program.opts().format as OutputFormat;
       const result = await del(token, `/api/1/notifications/${channel}/rule/${ruleId}`);
       printOutput(result, format);

@@ -1,8 +1,8 @@
 import { readFileSync } from 'fs';
 import { basename } from 'path';
 import { Command } from 'commander';
+import { projectToken } from '../auth.ts';
 import { postForm } from '../client.ts';
-import { getProjectToken } from '../config.ts';
 import type { OutputFormat } from '../output.ts';
 import { printOutput } from '../output.ts';
 
@@ -15,7 +15,7 @@ export function registerSourcemapsCommand(program: Command): void {
     .option('--version <version>', 'Code version')
     .option('--minified-url <url>', 'URL of the minified file')
     .action(async (opts: { file: string; version?: string; minifiedUrl?: string }) => {
-      const token = program.opts().token ?? getProjectToken(program.opts().project);
+      const token = projectToken(program);
       const format = program.opts().format as OutputFormat;
       const form = new FormData();
       const fileContent = readFileSync(opts.file);
@@ -32,7 +32,7 @@ export function registerSourcemapsCommand(program: Command): void {
     .requiredOption('--file <path>', 'Path to dSYM zip file')
     .option('--version <version>', 'Code version')
     .action(async (opts: { file: string; version?: string }) => {
-      const token = program.opts().token ?? getProjectToken(program.opts().project);
+      const token = projectToken(program);
       const format = program.opts().format as OutputFormat;
       const form = new FormData();
       const fileContent = readFileSync(opts.file);
@@ -48,7 +48,7 @@ export function registerSourcemapsCommand(program: Command): void {
     .requiredOption('--file <path>', 'Path to ProGuard mapping file')
     .option('--version <version>', 'Code version')
     .action(async (opts: { file: string; version?: string }) => {
-      const token = program.opts().token ?? getProjectToken(program.opts().project);
+      const token = projectToken(program);
       const format = program.opts().format as OutputFormat;
       const form = new FormData();
       const fileContent = readFileSync(opts.file);
@@ -64,7 +64,7 @@ export function registerSourcemapsCommand(program: Command): void {
     .requiredOption('--file <path>', 'Path to Flutter symbols file')
     .option('--version <version>', 'Code version')
     .action(async (opts: { file: string; version?: string }) => {
-      const token = program.opts().token ?? getProjectToken(program.opts().project);
+      const token = projectToken(program);
       const format = program.opts().format as OutputFormat;
       const form = new FormData();
       const fileContent = readFileSync(opts.file);
